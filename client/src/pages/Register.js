@@ -9,7 +9,7 @@ const Register = () => {
   //form handler
   const onfinishHandler = async (values) => {
     try {
-      const res = await axios.post("http://localhost:8000/register", values);
+      const res = await axios.post("http://localhost:8000/user/register", values);
       if (res.data.success) {
         message.success("Register Successfully!");
         navigate("/login");
