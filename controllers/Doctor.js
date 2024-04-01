@@ -1,189 +1,206 @@
-require("dotenv").config();
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-//doctor can is created this function
-const createDoctor = async (req, res) => {
-  try {
-    console.log(req.body, "inside");
-    let olddoctor = await doctor.findOne({ where: { email: req.body.email } });
-    console.log(olddoctor);
-    if (!olddoctor) {
-      req.body.password = await bcrypt.hash(req.body.password, 2);
-      console.log(req.body);
-      let newdoctor = await doctor.create({
-        ...req.body,
-      });
-      res.status(202).send({ isError: false, Msg: newdoctor });
-    } else {
-      res.status(403).send({ isError: true, Msg: "Email is Already Present" });
+const Doctor=require('../models/doctorModel')
+const Token=require("../model/Tokenmodel")
+const sendEmail=require("../sendEmail")
+const crypto=require("crypto")
+const jwt=require('jsonwebtoken')
+const expressjwt=require('express-jwt')
+
+exports.register=async(req,res)=>{
+    // destructuring
+    const {username,email,password}=req.body
+    const user=await User.findOne({email:email})
+    if(user){
+       return res.status(400).json({error:"User already exist"})
     }
-  } catch (err) {
-    res.status(404).send({ isError: true, Msg: err });
-  }
-};
-// can find All the doctors from this function
-const getAllDoctors = async (req, res) => {
-  try {
-    let newdoctor = await doctor.findAll();
-    res.status(202).send({ isError: false, Msg: newdoctor });
-  } catch (err) {
-    res.status(404).send({ isError: true, Msg: err });
-  }
-};
-//can find specific doctor by providing email address in params
-const getDoctors = async (req, res) => {
-  console.log(req.params.id, "inside");
-  try {
-    console.log(req.params.id);
-    let newdoctor = await doctor.findAll({ where: { email: req.params.id } });
-    console.log(newdoctor);
-    res.status(202).send({ isError: false, Msg: newdoctor });
-  } catch (err) {
-    res.status(404).send({ isError: true, Msg: err });
-  }
-};
-//can update specific doctor by providing email address in params
-const updateDoctor = async (req, res) => {
-  try {
-    let newdoctor = await doctor.update(
-      { ...req.body },
-      { where: { id: req.params.id } }
-    );
-    res.status(202).send({ isError: false, Msg: newdoctor });
-  } catch (err) {
-    res.status(404).send({ isError: true, Msg: err });
-  }
-};
-//can delete specific doctor by providing email address in params
-const deleteDoctor = async (req, res) => {
-  try {
-    let newdoctor = await doctor.destroy({
-      where: { id: req.params.id },
-    });
-    res.status(202).send({ isError: false, Msg: newdoctor });
-  } catch (err) {
-    res.status(404).send({ isError: true, Msg: err });
-  }
-};
-//can login in with providing password and email address
-const getTokenDoctor = async (req, res) => {
-  console.log(req.body);
-  try {
-    let olddoctor = await doctor.findOne({ where: { email: req.body.email } });
-    console.log(olddoctor.password);
-    if (!olddoctor) {
-      res.status(404).send({ isError: true, Msg: "doctor not found" });
-    } else {
-      const isPassCorrect = await bcrypt.compare(
-        req.body.password,
-        olddoctor.password
-      );
-      console.log(isPassCorrect);
-      if (isPassCorrect) {
-        const Token = await jwt.sign(
-          {
-            name: olddoctor.name,
-            role: olddoctor.role,
-            email: olddoctor.email,
-          },
-          process.env.secretKey,
-          { expiresIn: "1d" }
-        );
-        const refreshToken = await jwt.sign(
-          {
-            name: olddoctor.name,
-            role: olddoctor.role,
-            email: olddoctor.email,
-          },
-          process.env.refreshSecretKey,
-          { expiresIn: "7d" }
-        );
-        res.cookie("token", Token);
-        res.cookie("refreshToken", refreshToken);
-        res
-          .status(202)
-          .send({
-            isError: false,
-            Msg: "Login Success",
-            token: Token,
-            refreshToken: refreshToken,
-            role: olddoctor.role,
-          });
-      } else {
-        res.status(401).send({ isError: true, Msg: "Wrong credentials" });
-      }
+    let register=new User({
+        username:username,
+        email:email,
+        password:password,
+    })
+    register=await register.save()
+    if(!register){
+        return res.status(400).json({error:"Something went wrong"})
     }
-  } catch (err) {
-    console.log(err);
-    res.status(404).send({ isError: true, Msg: err });
-  }
-};
-//forgot password here
-const forgotPasswordDoctor = async (req, res) => {
-  console.log(req.body);
-  try {
-    let olddoctor = await doctor.findOne({ where: { email: req.body.email } });
-    console.log(olddoctor, "ok");
-    console.log(olddoctor.email, olddoctor.otp);
-    if (!olddoctor) {
-      res.status(404).send({ isError: true, Msg: "Email not found" });
-    } else {
-      let o = Math.floor(Math.random() * 1000000);
-      console.log(typeof o);
-      console.log(olddoctor.email, olddoctor.otp);
-      let newdoctor = await doctor.update(
-        { otp: o },
-        { where: { email: olddoctor.email } }
-      );
-      const isSended = await sendEmail(olddoctor.email, o, olddoctor.name, res);
-      console.log(isSended);
-      if (isSended) {
-        res
-          .status(202)
-          .send({
-            isError: false,
-            Msg: "OTP Sended On Your Email!",
-            newdoctor,
-          });
-      } else {
-        res.status(500).send({ isError: true, Msg: "SendGrid Error" });
-      }
+    let token=await Token({
+        token:crypto.randomBytes(16).toString('hex'),
+        user:register._id
+    })
+    token =await token.save()
+    if(!token){
+        return res.status(400).json({error:"Something went wrong"})
     }
-  } catch (err) {
-    res.status(404).send({ isError: true, Msg: err });
-  }
-};
-//this function is updating password after OTP checking
-const updatePasswordDoctor = async (req, res) => {
-  try {
-    let olddoctor = await doctor.findOne({ where: { email: req.body.email } });
-    console.log(olddoctor);
-    if (!olddoctor) {
-      res.status(404).send({ isError: true, Msg: "Email not found" });
-    } else {
-      if (olddoctor.otp === req.body.otp) {
-        req.body.password = bcrypt.hash(req.body.password, 2);
-        let newdoctor = await doctor.update(
-          { password: req.body.password },
-          { where: { email: olddoctor.email } }
-        );
-        res.status(202).send({ isError: false, Msg: "Password updated" });
-      } else {
-        res.status(404).send({ isError: true, Msg: "Wrong OTP" });
-      }
+    // send verification mail 
+    const url=`http://localhost:3001/user/verification/${token.token}`
+    sendEmail({
+        from:"noreply@gmail.com",
+        to:user.email,
+        object:"Verification Mail",
+        text:"Click the Following link"+url,
+        html:`<a href=${url}> <button>Click this link </button> </a>`
+
+    })
+
+    res.send(register)
+}
+
+exports.verifyuser=async(req,res)=>{
+    let token=await Token.findOne({token:req.params.id})
+    if(!token){
+        return res.status(400).json({error:"Invalid Token"})
     }
-  } catch (err) {
-    res.status(404).send({ isError: true, Msg: err });
-  }
-};
-//All exports statements
-module.exports = {
-  createDoctor,
-  getAllDoctors,
-  getDoctors,
-  updateDoctor,
-  deleteDoctor,
-  getTokenDoctor,
-  forgotPasswordDoctor,
-  updatePasswordDoctor,
-};
+    let verify=await User.findById(token.user)
+    if(!verify){
+        return res.status(400).json({error:"User associated with token not found"})
+    }
+    // check if the user is verified or not 
+    if(verify.isVerified){
+        return res.status(400).json({error:"User has already been verified"})
+    }
+    verify.isVerified=true
+    verify=await verify.save()
+    if(!verify){
+        return res.status(400).json({error:"Something went wrong"})
+    }
+    res.send({message:"User verification successful"})
+}
+
+exports.resendverification=async(req,res)=>{
+    const {email}=req.body
+    let user=await User.findOne({email:email})
+    if(!user){
+        return res.status(400).json({error:"user not found"})
+    }
+    if(user.isVerified){
+        return res.status(400).json({error:"User has been already verified"})
+    }
+    let token=new Token({
+        token:crypto.randomBytes(16).toString('hex'),
+        user:user._id
+    })
+    token =await token.save()
+    if(!token){
+        return res.status(400).json({error:"Something went wrong"})
+    }
+    // send verification mail 
+    const url=`http://localhost:3000/user/verification/${token.token}`
+    sendEmail({
+        from:"noreply@gmail.com",
+        to: email,
+        object:"Verification Mail",
+        text:"Click the Following link"+url,
+        html:`<a href=${url}> <button>Click this link </button> </a>`
+
+    })
+    res.send({register})
+}
+
+exports.getalluser=async(req,res)=>{
+    let user=await User.find()
+    if(!user){
+        return res.status(400).json({error:"Something went wrong"})
+    }
+    return res.send(user)
+}
+
+exports.forgetPassword=async(req,res)=>{
+    let user= await User.findOne({email:req.body.email})
+    if(!user){
+        return res.status(400).json({error:"Email Not Found"})
+    }
+    let token=new token({
+        token:crypto.randomBytes(16).toString('hex'),
+        user:user._id
+    })
+    token=await token.save()
+    if(!token){
+        return res.status(400).json({error:"Something went wrong"})
+    }
+
+    const url=`http://localhost:3000/user/resetpassword/${token.token}`
+    sendEmail({
+        from:"noreply@gmail.com",
+        to: email,
+        subject:"Reset Password Link",
+        text:"Click the Following link"+url,
+        html:`<a href=${url}> <button>Click this link </button> </a>`
+
+    })
+    res.send({message:"Password reset link sent"})
+
+}  
+
+exports.resetPassword=async(req,res)=>{
+    let token=await Token.findOne({token:req.params.id})
+    if(!token){
+        return res.status(400).json({error:"Token Invalid"})
+    }
+    let user =await User.findById(token.user)
+    if(!user){
+        return res.status(400).json({error:"User not found"})
+    }
+    user.password=req.body.password
+    user=await user.save()
+    if(!user){
+        return res.status(400).json({error:"Something went wrong"})
+    }
+    res.send({message:"Password Updated"})
+}
+
+exports.singleuserdetail=async(req,res)=>{
+    let user = await User.findById(req.params.id)
+    if(!user){
+        return res.status(400).json({error:"User Not Found"})
+    }
+    res.send(user)
+}
+
+exports.updateuser=async(req,res)=>{
+    let user=await User.findById(req.params.id,{
+        username:req.body.username
+    })
+    if(!user){
+        return res.status(400).json({error:"User not found"})
+    }
+    user=await user.save()
+    res.json({message:"User updated"})
+}
+
+exports.deleteuser=async(req,res)=>{
+    let user=await User.findByIdAndDelete(req.params.id)
+    if(!user){
+        return res.status(400).json({error:"User not found"})
+    }
+
+    return res.json({success:"User deleted"})
+}
+
+exports.signIn=async(req,res)=>{
+const {email,password}=req.body
+let user=await User.findOne({email:email})
+if(!user){
+    return res.status(400).json({error:"User not found"})
+}
+// check password
+    if(!user.authenticate(password)){
+        return res.status(400).json({error:"Password Incorrect"})
+    }
+    if(!user.isVerified){
+        return res.status(400).json({error:"User not verified, Please verify"})
+    }
+    // generate token
+    let token=jwt.sign({user:user._id,role:user.role},process.env.JWT_SECRET)
+    // storing in cookie
+    res.cookie('mycookie',token,{expire:Date.now()+86400})
+    // sending information to frontend
+    const{_id,username,role}=user
+    res.send({token,user:{
+        _id,username,email,role
+    }})
+}
+
+exports.signout=async(req,res)=>{
+    res.clearCookie('mycookie')
+    res.send({message:"Signed out Successfully"})
+}
+
+exports.authorize=expressjwt({ secret: "process.env.JWT_SECRET", algorithms: ["HS256"] })

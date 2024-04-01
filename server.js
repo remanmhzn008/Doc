@@ -21,7 +21,7 @@ app.use(moragan("dev"));
 app.use(cors())
 
 //routes
-app.use("/user", require("./routes/userRoutes"));
+app.use("/api/v1/user", require("./routes/userRoutes"));
 // app.use("/doctor",require("./routes/doctorRouter"))
 
 

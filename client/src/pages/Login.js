@@ -9,9 +9,8 @@ const Login = () => {
   //form handler
   const onfinishHandler = async (values) => {
 
-  console.log(values)
     try {
-      const res = await axios.post("http://localhost:8000/user/login", values);
+      const res = await axios.post("/api/v1/user/login", values);
       if (res.data.success) {
         localStorage.setItem("token", res.data.token);
         message.success("Login Successfully");
