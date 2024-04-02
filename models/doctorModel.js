@@ -1,39 +1,56 @@
-mongoose=require("mongoose")
+const mongoose = require("mongoose");
 
-const DoctorSchema=new mongoose.Schema({
-    username:{
-        type:String,
-        required:true,
-        trim:true
+const doctorSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: String,
     },
-    email:{
-        type:String,
-        required:true
+    firstName: {
+      type: String,
+      required: [true, "first name is required"],
     },
-    hashed_password:{
-        type:String,
-        required:true,
+    lastName: {
+      type: String,
+      required: [true, "last name is required"],
     },
-    degree:{
-    type:Datatype.STRING,
-    AllowNull:false
+    phone: {
+      type: String,
+      required: [true, "phone no is required"],
     },
-    yearOfExperience:{
-    type:Datatype.STRING,
-    AllowNull:false
+    email: {
+      type: String,
+      required: [true, "email is required"],
     },
-    role:{
-        type:Number,
-        // 0 is user and 1 is admin
-        default:0
+    website: {
+      type: String,
     },
-    isVerified:{
-        type:Boolean,
-        default:false
+    address: {
+      type: String,
+      required: [true, "address is required"],
     },
-    salt:String
-},{timestamps:true})
+    specialization: {
+      type: String,
+      required: [true, "specialization is require"],
+    },
+    experience: {
+      type: String,
+      required: [true, "experience is required"],
+    },
+    feesPerCunsaltation: {
+      type: Number,
+      required: [true, "fee is required"],
+    },
+    status: {
+      type: String,
+      default: "pending",
+    },
+    timings: {
+      type: Object,
+      required: [true, "wrok timing is required"],
+    },
+  },
+  { timestamps: true }
+);
 
-
-
-module.exports=mongoose.model("Doctor",DoctorSchema)
+const doctorModel = mongoose.model("doctors", doctorSchema);
+module.exports = doctorModel;

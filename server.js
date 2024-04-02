@@ -26,7 +26,7 @@ app.use("/api/v1/user", require("./routes/userRoutes"));
 
 
 //port
-const port = process.env.PORT || 8080;
+const port = process.env.PORT ;
 //listen port
 app.listen(port, () => {
   console.log(`Server Running in ${port}`);

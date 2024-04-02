@@ -1,17 +1,31 @@
-const express = require('express');
-const doctorRouter = express.Router();
-const { createDoctor, getAllDoctors, getDoctors, updateDoctor, deleteDoctor, getTokenDoctor, forgotPasswordDoctor, updatePasswordDoctor } = require("../controllers/Doctor");
-const { tokenValidator } = require('../middlewares/tokenValidator');
+const express = require("express");
+const {
+  getDoctorInfoController,
+  updateProfileController,
+  getDoctorByIdController,
+  doctorAppointmentsController,
+  updateStatusController,
+} = require("../controllers/doctorCtrl");
+const authMiddleware = require("../middlewares/authMiddleware");
+const router = express.Router();
 
-doctorRouter.use(express.json())
+//POST SINGLE DOC INFO
+router.post("/getDoctorInfo", authMiddleware, getDoctorInfoController);
 
-doctorRouter.get("/", tokenValidator, getAllDoctors);
-doctorRouter.get("/find/:id", tokenValidator, getDoctors);
-doctorRouter.post("/reg", createDoctor);
-doctorRouter.post("/log", getTokenDoctor);
-doctorRouter.patch("/:id", tokenValidator, updateDoctor);
-doctorRouter.delete("/:id", tokenValidator,  deleteDoctor);
-doctorRouter.post("/forgot", forgotPasswordDoctor);
-doctorRouter.post("/update", updatePasswordDoctor);
+//POST UPDATE PROFILE
+router.post("/updateProfile", authMiddleware, updateProfileController);
 
-module.exports = { doctorRouter };
+//POST  GET SINGLE DOC INFO
+router.post("/getDoctorById", authMiddleware, getDoctorByIdController);
+
+//GET Appointments
+router.get(
+  "/doctor-appointments",
+  authMiddleware,
+  doctorAppointmentsController
+);
+
+//POST Update Status
+router.post("/update-status", authMiddleware, updateStatusController);
+
+module.exports = router;
