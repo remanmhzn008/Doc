@@ -71,3 +71,24 @@
     color: rgb(51,1,1);
     
 }
+
+.header-content{
+    margin:0 15px;
+    display: flex;
+    height: 50px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.header-content i{
+    margin-right: 20px;
+    font-size: 1.2rem;
+}
+
+.header-content a{
+    text-decoration: none;
+    font-size: 1.2rem;
+    color: blue;
+    margin: 0 10px;
+    text-transform: uppercase;
+}
