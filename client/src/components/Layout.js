@@ -1,12 +1,17 @@
 import React from "react";
 import "../styles/LayoutStyles.css";
 import { adminMenu, userMenu } from "./../Data/Data";
+import {Outlet} from "react-router-dom"
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Badge, message } from "antd";
 const Layout = ({ children }) => {
-  const { user } = useSelector((state) => state.user);
+  // const { user } = useSelector(state => state.user);
+  const u = localStorage.getItem('userInfo')
+  const user = JSON.parse(u)
+
+  console.log('user',user)
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -71,7 +76,7 @@ const Layout = ({ children }) => {
           <div className="header">
             <div className="header-content" style={{ cursor: "pointer" }}>
               <Badge
-                count={user && user.notifcation.length}
+                count={user && user?.notifcation?.length}
                 onClick={() => {
                   navigate("/notification");
                 }}
@@ -84,7 +89,9 @@ const Layout = ({ children }) => {
           </div>
           <div className="body">{children}</div>
         </div>
+        <Outlet />
       </div>
+      
     </div>
   );
 };

@@ -14,10 +14,14 @@ const Login = () => {
     try {
       dispatch(showLoading());
       const res = await axios.post("/api/v1/user/login", values);
-      window.location.reload();
-      dispatch(hideLoading());
-      if (res.data.success) {
+      // window.location.reload();
+      // console.log('resUser',res.data.user)
+  
+      // dispatch(hideLoading());
+      if (res?.data?.success) {
         localStorage.setItem("token", res.data.token);
+        localStorage.setItem('userInfo', JSON.stringify(res?.data?.user))
+        dispatch(res?.data?.user)
         message.success("Login Successfully");
         navigate("/");
       } else {
