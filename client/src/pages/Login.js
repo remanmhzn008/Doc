@@ -20,7 +20,8 @@ const Login = () => {
       // dispatch(hideLoading());
       if (res?.data?.success) {
         localStorage.setItem("token", res.data.token);
-        localStorage.setItem('userInfo', JSON.stringify(res?.data?.user))
+        localStorage.setItem('userInfo', JSON.stringify(res?.data?.user)
+        )
         dispatch(res?.data?.user)
         message.success("Login Successfully");
         navigate("/");
