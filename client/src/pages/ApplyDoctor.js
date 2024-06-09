@@ -1,11 +1,10 @@
 import React from "react";
 import Layout from "./../components/Layout";
-import { Col, Form, Input, Row, TimePicker, message } from "antd";
+import { Col, Form, Input, Row, message } from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { showLoading, hideLoading } from "../redux/features/alertSlice";
 import axios from "axios";
-import moment from "moment";
 const ApplyDoctor = () => {
   const { user } = useSelector((state) => state.user);
 
@@ -20,10 +19,7 @@ const ApplyDoctor = () => {
         {
           ...values,
           userId: user._id,
-          timings: [
-            moment(values.timings[0]).format("HH:mm"),
-            moment(values.timings[1]).format("HH:mm"),
-          ],
+        
         },
         {
           headers: {
@@ -138,12 +134,7 @@ const ApplyDoctor = () => {
               <Input type="text" placeholder="your contact no" />
             </Form.Item>
           </Col>
-          <Col xs={24} md={24} lg={8}>
-            <Form.Item label="Timings" name="timings" required>
-              <TimePicker.RangePicker format="HH:mm" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={24} lg={8}></Col>
+          
           <Col xs={24} md={24} lg={8}>
             <button className="btn btn-primary form-btn" type="submit">
               Submit
