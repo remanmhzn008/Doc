@@ -36,6 +36,6 @@ const HomePage = () => {
       </Row>
     </Layout>
   );
-}
+};
 
 export default HomePage;

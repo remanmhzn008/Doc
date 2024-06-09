@@ -1,4 +1,3 @@
-
 import React from "react";
 import "../styles/RegiserStyles.css";
 import { Form, Input, message } from "antd";
