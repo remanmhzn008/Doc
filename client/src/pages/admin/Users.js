@@ -20,10 +20,44 @@ const Users = () => {
       console.log(error);
     }
   };
+  
 
   useEffect(() => {
     getUsers();
   }, []);
+
+  // const handleDelete=async(id)=>{
+  //   try{
+  //     const res=await axios.delete(`/api/v1/user/deleteuser/${id}`,{
+  //       headers:{
+  //         Authorization:`Bearer ${localStorage.getItem("token")}`,
+  //       }
+  //     })
+  //     console.log(`${id}`)
+  //     return res.data
+  //   }catch(error){
+  //     console.log(error)
+  //   }
+  // }
+
+  const handleDelete = async (id) => {
+    try {
+      const res = await axios.delete(`/api/v1/user/deleteuser/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (res.data.success) {
+        console.log(res.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  
+
+  
 
   // antD table col
   const columns = [
@@ -45,7 +79,7 @@ const Users = () => {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex">
-          <button className="btn btn-danger">Block</button>
+          <button className="btn btn-danger" onClick={()=>handleDelete(record._id)}>Delete</button>
         </div>
       ),
     },

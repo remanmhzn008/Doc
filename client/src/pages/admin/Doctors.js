@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Layout from "./../../components/Layout";
 import axios from "axios";
@@ -70,6 +69,22 @@ const Doctors = () => {
       dataIndex: "actions",
       render: (text, record) => (
         <div className="d-flex">
+          {/* {record.status === "pending" ? (
+            <button
+              className="btn btn-success"
+              onClick={() => handleAccountStatus(record, "approved")}
+            >
+              Approve
+            </button>
+          ) : (
+            <button
+              onClick={() => handleAccountStatus(record, "reject")}
+              className="btn btn-danger"
+            >
+              Reject
+            </button>
+          )} */}
+
           {record.status === "pending" ? (
             <button
               className="btn btn-success"
@@ -78,7 +93,12 @@ const Doctors = () => {
               Approve
             </button>
           ) : (
-            <button className="btn btn-danger">Reject</button>
+            <button
+              className="btn btn-danger"
+              onClick={() => handleAccountStatus(record, "pending")}
+            >
+              Remove
+            </button>
           )}
         </div>
       ),

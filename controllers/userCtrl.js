@@ -265,6 +265,14 @@ const userAppointmentsController = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  let deleteuser = await userModel.findByIdAndDelete(req.params.id);
+  if (!deleteuser) {
+    return res.status(400).json({ error: "something went wrong" });
+  }
+  res.json({ success: "Deleted successfully" });
+};
+
 module.exports = {
   loginController,
   registerController,
@@ -276,4 +284,5 @@ module.exports = {
   bookeAppointmnetController,
   bookingAvailabilityController,
   userAppointmentsController,
+  deleteUser,
 };
